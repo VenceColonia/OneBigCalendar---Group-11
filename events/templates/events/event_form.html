@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Event Card</title>
+</head>
+<body>
+    <h1>Create Event Card</h1>
+ <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Create Card</button>
+</form>
+    <a href="{% url 'event_list' %}">Back to cards</a>
+</body>
+</html>

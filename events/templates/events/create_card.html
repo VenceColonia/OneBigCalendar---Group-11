@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Event Card</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f7f9fb;
+            display: flex;
+            justify-content: center;
+            padding-top: 50px;
+        }
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            width: 400px;
+        }
+        h1 {
+            text-align: center;
+        }
+        form p {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+        }
+        input[type="text"],
+        textarea,
+        select,
+        input[type="file"],
+        input[type="date"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            overflow: hidden;
+        }
+        button {
+            background-color: #2d89ef;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 15px;
+            width: 100%;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        small {
+            display: block;
+            margin-top: 5px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <a href="{% url 'event_list' %}">← Back to Event List</a>
+        <h1>Create New Event Card</h1>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <p>
+                {{ form.title.label_tag }}
+                {{ form.title }}
+            </p>
+            <p>
+                {{ form.description.label_tag }}
+                {{ form.description }}
+            </p>
+            <div style="display: flex; gap: 20px;">
+    		<p style="flex: 1;">
+        		{{ form.tag.label_tag }}
+        		{{ form.tag }}
+    		</p>
+    		<p style="flex: 1;">
+        		{{ form.type.label_tag }}
+        		{{ form.type }}
+    		</p>
+	    </div>
+            <p>
+                {{ form.image.label_tag }}
+                {{ form.image }}
+                <small>Ideal image dimensions: 512x512 px</small>
+            </p>
+            <p>
+    		{{ form.created_at.label_tag }}
+    		{{ form.created_at }}
+    		<small>Include date and time (e.g., 2025-07-16 14:30)</small>
+	    </p>
+	    <p>
+                {{ form.hosted_by.label_tag }}
+                {{ form.hosted_by }}
+            </p>
+
+            <button type="submit">Create</button>
+        </form>
+    </div>
+
+    <script>
+        // Auto-expand textarea on input
+        document.addEventListener('DOMContentLoaded', function () {
+            const textarea = document.querySelector('textarea');
+            if (textarea) {
+                textarea.setAttribute('style', 'height:' + (textarea.scrollHeight) + 'px;overflow-y:hidden;');
+                textarea.addEventListener('input', function () {
+                    this.style.height = 'auto';
+                    this.style.height = (this.scrollHeight) + 'px';
+                });
+            }
+        });
+    </script>
+</body>
+</html>

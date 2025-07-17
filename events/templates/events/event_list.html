@@ -1,0 +1,226 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Event Cards</title>
+  <style>
+    .banner {
+      width: 100%;
+      height: 200px;
+      background-image: url("{% static 'events/images/banner.png' %}");
+      background-size: cover;
+      background-position: center;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f8;
+    }
+
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background-color: white;
+      padding: 15px 30px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .top-bar h1 {
+      margin: 0;
+      font-size: 26px;
+      color: #2c3e50;
+    }
+
+    .top-bar a {
+      text-decoration: none;
+      background-color: #5a3fc0;
+      color: white;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 5px;
+    }
+
+    .top-bar select,
+    .top-bar input[type="text"] {
+      padding: 6px 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .logout-link {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-size: 14px;
+    }
+
+    .logout-link a {
+      color: #e74c3c;
+      text-decoration: none;
+    }
+
+    .event-container {
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .event-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      max-width: 1100px;
+      width: 100%;
+    }
+
+    .event-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.07);
+      background: white;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .event-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+
+    .event-card .no-image {
+      width: 100%;
+      height: 150px;
+      background-color: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+    }
+
+    .event-card-content {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .event-card-content h3 {
+      margin: 0 0 6px 0;
+    }
+
+    .event-card-content p {
+      font-size: 14px;
+      margin: 0 0 10px 0;
+      word-wrap: break-word;
+      white-space: normal;
+    }
+
+    .event-card-footer {
+      margin-top: auto;
+      text-align: center;
+      font-size: 13px;
+      font-weight: bold;
+      color: #333;
+      padding-top: 10px;
+      border-top: 1px solid #eee;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sticky Header -->
+<div class="sticky-header">
+  <div class="top-bar">
+    <h1>One Big Calendar</h1>
+    <div style="display: flex; gap: 15px; align-items: center;">
+      <!-- Category Filter -->
+      <select name="tag" id="tagFilter">
+        <option value="">Select category</option>
+        <option value="LIONS" {% if selected_tag == "LIONS" %}selected{% endif %}>LIONS</option>
+        <option value="COA" {% if selected_tag == "COA" %}selected{% endif %}>COA</option>
+      </select>
+
+      <!-- Type Filter -->
+      <select name="type" id="typeFilter">
+        <option value="">Select type</option>
+        <option value="Talk" {% if selected_type == "Talk" %}selected{% endif %}>Talk</option>
+        <option value="Concert" {% if selected_type == "Concert" %}selected{% endif %}>Concert</option>
+        <option value="Conference" {% if selected_type == "Conference" %}selected{% endif %}>Conference</option>
+        <option value="Party" {% if selected_type == "Party" %}selected{% endif %}>Party</option>
+      </select>
+
+      <!-- Live Search -->
+      <input type="text" id="searchInput" name="search" placeholder="Search events...">
+
+      <!-- Create Button -->
+      <a href="{% url 'create_card' %}">
+        Create a new event card
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Banner Image -->
+<div class="banner-image">
+  <img src="{% static 'events/images/banner.png' %}" alt="Events Banner" style="width: 100%; height: auto; display: block;">
+</div>
+
+<!-- Logout link -->
+{% if user.is_authenticated %}
+  <div class="logout-link">
+    <a href="{% url 'logout' %}">Logout</a>
+  </div>
+{% endif %}
+
+<!-- Event Cards -->
+<div class="event-container">
+  <div class="event-grid" id="card-container">
+    {% include "partials/card_grid.html" %}
+  </div>
+</div>
+
+<!-- JS for live search and filtering -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const tagFilter = document.getElementById('tagFilter');
+    const typeFilter = document.getElementById('typeFilter');
+    const searchInput = document.getElementById('searchInput');
+    const cardContainer = document.getElementById('card-container');
+
+    function fetchFilteredCards() {
+      const tag = tagFilter.value;
+      const type = typeFilter.value;
+      const search = searchInput.value;
+
+      const params = new URLSearchParams({ tag, type, search });
+
+      fetch(`/search/?${params.toString()}`)
+        .then(response => response.json())
+        .then(data => {
+          cardContainer.innerHTML = data.html;
+        });
+    }
+
+    // Trigger on typing (live)
+    searchInput.addEventListener('input', fetchFilteredCards);
+    tagFilter.addEventListener('change', fetchFilteredCards);
+    typeFilter.addEventListener('change', fetchFilteredCards);
+  });
+</script>
+
+</body>
+</html>
